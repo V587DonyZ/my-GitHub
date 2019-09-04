@@ -119,7 +119,9 @@ Web服务器解析请求，定位请求资源。服务器将资源副本写到TC
   请求方法 | 空格 | URL | 空格 | 协议版本 | 回车符 | 换行符		--→ 	响应正文
   ```
 
-  
+------
+
+
 
 # 2. Django的使用
 
@@ -251,6 +253,9 @@ while True:
     ```
     
 
+------
+
+
 
 # 3. 静态文件的配置
 
@@ -271,6 +276,10 @@ while True:
   ```
 
   - `settings.py`配置好后, 需要在项目下新建文件`static`, 这个`static`是存放 `CSS, JavaScript, Images`等静态文件的一个根目录
+
+------
+
+
 
 # 4. 登录验证
 
@@ -355,6 +364,8 @@ required="" 是表单的必填项,删除后,就可以了
   
   ```
 
+  ------
+  
   
 
 # 5. app
@@ -447,6 +458,8 @@ urlpatterns = [
     url(r'^login/', views.login),  # 引用
 ]
 ```
+
+------
 
 
 
@@ -962,6 +975,10 @@ urlpatterns = [
   ```
 
   ​	
+  
+  ------
+  
+  
 
 # 8. 外键
 
@@ -1087,6 +1104,8 @@ book_obj.pub_id = pub_id
 # book_obj.pub = models.Publisher.objects.get(pk=pub_id)
 book_obj.save()
 ```
+
+------
 
 
 
@@ -1430,6 +1449,10 @@ Template(模版)：负责如何把页面展示给用户
 View(视图)：负责业务逻辑，并在适当的时候调用Model和Template
 ```
 
+------
+
+
+
 # 11. Django模板系统
 
 ### 常用语法
@@ -1596,21 +1619,7 @@ from django.utils.safestring import mark_safe	# 导入模块
 
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+------
 
 
 
@@ -1686,6 +1695,14 @@ from django.utils.safestring import mark_safe	# 导入模块
 **这个标签用于跨站请求伪造保护。**
 
 **在页面的form表单里面写上 `{% csrf_token %}`**
+
+```html
+<form action='' method="POST">
+    {% csrf_token% }
+    <input type="text" class="" name='name'>
+    <button>提交</button>
+</form>
+```
 
 
 
@@ -1780,6 +1797,10 @@ def join_str(*args, **kwargs):
 {% join_str 'v1' 'v2' k3='k3' k4='v4' %}  # 结果 : v1_v2k3*k4
 ```
 
+------
+
+
+
 # 16. 自定义inclusion_tag
 
 ## 分页
@@ -1830,6 +1851,10 @@ def join_str(*args, **kwargs):
 
    
 
+------
+
+
+
 # 17. 三种自定义函数+装饰器
 
 ```python
@@ -1858,35 +1883,840 @@ def page(num):
 {% page 5 %}
 ```
 
+------
+
+# 18. Django的view视图
+
+一个视图函数(类), 简称视图, 是一个简单的python函数(类),它接收web请求并且返回Web响应.，响应可以是一张网页的HTML内容，一个重定向，一个404错误，一个XML文档，或者一张图片。
+
+## FBV 和CBV
+
+**FBV - function based view ：基于函数的view**
+
+**CBV - class based view ：基于类的view**
+
+**定义CBV :**
+
+**在`views.py`中**
+
+```python
+from django.views import View # 继承Django的类
+class AddPublisher(View): # 自定义一个类
+    def get(self.request): # get函数为固定写法，表示处理GET请求
+        # 处理get请求
+        return render（request, 'index.html'
+    def post(self,request):
+        ...
+```
+
+**在 `urls.py`中写对应关系**
+
+```python
+from django import models
+urlpatterns = [
+    url(r'^publisher_add/', views.AddPublisher.as_view()),
+]
+```
+
+
+
+## CBV流程
+
+1. 项目启动时，运行urls.py。
+
+   url(r'^publisher_add/',views.AddPublisher.as_view() ),
+   AddPublisher.as_view() 执行  ——》   view函数
+
+2. 请求到来时，实行view函数：
+
+   1. 实例化AddPublisher  ——》  self 
+
+   2. self.request = request  
+
+   3. 执行View中self.dispatch(request, *args, **kwargs)
+
+      1. 判断请求方式是否被允许
+
+         1. 允许
+
+            通过反射获取请求方式对应的方法   ——》 handler
+
+         2. 不允许
+
+            self.http_method_not_allowed  ——》 handler
+
+      2. 执行handler 获取到响应
+
+## 视图加装饰器
+
+### 1.  定义允许访问的请求方式
+
+```python
+from django.views import View # 继承Django的类
+class AddPublisher(View): # 自定义一个类
+    
+     # 定义允许访问的请求方式
+     http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options', 'trace']
+    
+    def get(self.request,*args,**kwargs): # get函数为固定写法，表示处理GET请求
+        # 处理get请求
+        return render（request, 'index.html'
+    def post(self,request,*args,**kwargs):
+        ...
+```
+
+**视图加装饰器**
+
+------
+
+```python
+views.py :
+      
+from django.shortcuts import render, HttpResponse, redirect
+from app01 import models
+import time
+
+# 写一个装饰器
+def timer(func):
+    def inner(request, *args, **kwargs):
+        start = time.time()
+        print(func)
+        print(args)
+        ret = func(request, *args, **kwargs)
+        print('{}'.format(time.time() - start))
+        return ret
+    return inner
+```
+
+### 2. FBV 视图加装饰器 :
+
+**直接加**
+
+```python
+@timer
+def publisher_list(request):
+    ...
+```
+
+
+
+### 3. CBV 视图加装饰器 :
+
+**加装饰器之前要导入模块 :**
+
+```python
+from django.utils.decorators import method_decorator
+```
+
+**1. 加在类下面的方法上 :**
+
+```python
+@method_decorator(timer)
+def get(self, request):
+    ...
+```
+
+**2. 加在dispath方法上 :**
+
+`dispath`方法是父类的方法,下面的是重写`dispath`方法
+
+```python
+@method_decorator(timer)
+def dispatch(self, request, *args, **kwargs):
+    # start = time.time()
+    ret = super().dispatch(request, *args, **kwargs)
+    # print('{}'.format(time.time() - start))
+    return ret
+```
+
+**3. 直接加在类上 :**
+
+**需要指定类下面的哪个方法**
+
+```python
+@method_decorator(timer, name='dispatch') # 指定dispath方法
+class AddPublisher(View):
+    ...
+    
+@method_decorator(timer, name='post')
+@method_decorator(timer, name='get')
+class AddPublisher(View):
+```
+
+------
+
+# 19. request对象
+
+
+
+```python
+request.method   获取请求方式  GET POST 
+request.GET.get()    url上携带的参数  {}   
+request.POST.get()   post请求提交的参数  {} 
+request.path_info # 获取的是url的路径信息  不包含IP和端口 也不包含查询参数 /路径/
+request.body   #  前端的请求体的具体数据  POST获取的数据 是从body中提取的
+
+request.scheme  - http 或https
+request.COOKIES   # cookie
+request.session   # session 
+request.FILES    # 上传的文件  
+request.META   # 头的信息 {}
+
+
+方法 :
+request.get_full_path()   # 完整的路径信息 不包含IP和端口 包含查询参数
+request.is_ajax()   # 判断是否是ajax请求
+```
+
+
+
+**上传文件** 
+
+```python
+views.py :
+    class FileLoad(View):
+    def get(self, request):
+        return render(request, 'file_upload.html')
+    def post(self, request):
+        file_obj = request.FILES.get('file1')   # request.FILES 是一个字典
+        with open(file_obj.name, 'wb')as f1:    # file_obj.name 是封装好的 获取的上传的文件的名字
+            for file in file_obj.chunks():  # chunks() 是提供的一个方法,一段一段的取
+                f1.write(file)
+        return HttpResponse("OK")
+```
+
+```html
+前端页面 :
+<form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>
+        上传文件: <input type="file" name="file1">
+    </p>
+    <button>上传</button>
+</form>
+```
+
+​	**`FILES`文件上传 需要注意的**
+
+```python
+1. FILES 只有在请求的方法为POST 且提交的<form> 带有enctype="multipart/form-data" 的情况下才会包含数据。否	则，FILES 将为一个空的类似于字典的对象
+2. input  type='file'
+3. request.FILES.get('file1')
+4. {% csrf_token %}
+```
+
+------
+
+# 20. response
+
+```python
+1. HttpResponse('字符串')   # 返回字符串
+2. render(request,'模板的文件名'，{})    # 返回一个完整的页面
+3. redirect（'/要跳转的地址/'）  # 重定向   响应头  Location：  url 
+```
+
+
+
+**JSON - 前后端自动  序列化→反序列化 :**
+
+```python
+from django.http.response import JsonResponse
+
+return JsonResponse(data)
+return JsonResponse(dict)   # 自动修改为 Content-type = 'application/json' 这样前端会自动反序列化
+return JsonResponse(list,safe=False)  # 非字典类型的 要有个参数 safe = False
+```
+
+
+
+------
+
+
+
+# 21. Django路由系统
+
+**url基本格式 :**
+
+```python
+from django.conf.urls import url
+from django.contrib import admin
+from app01 import views
+urlpatterns = [
+     url(正则表达式, views视图，参数，别名),
+]
+
+
+url(r'^admin/$', admin.site.urls),
+1. 从上到下匹配
+2. 匹配到后就不再匹配
+3. 根据第二点,要在后面加$ ,防止截胡
+4. 开头不用加/ :
+    Django配置文件settings.py默认没有APPEND_SLASH这个参数,默认是True
+    作用是自动在网址结尾加 "/"
+```
+
+```python
+from django.conf.urls import url
+from app01 import views
+
+urlpatterns = [
+    url(r'^articles/2003/$', views.special_case_2003),
+    url(r'^articles/([0-9]{4})/$', views.year_archive),
+    url(r'^articles/([0-9]{4})/([0-9]{2})/$', views.month_archive),
+    url(r'^articles/([0-9]{4})/([0-9]{2})/([0-9]+)/$', views.article_detail),
+]
+
+参数说明 :
+正则表达式：一个正则表达式字符串
+views视图：一个可调用对象，通常为一个视图函数
+参数：可选的要传递给视图函数的默认参数（字典形式）
+别名：一个可选的name参数
+```
+
+**Django 2.0版本中的路由系统的写法 :**
+
+```python
+from django.urls import path，re_path
+
+urlpatterns = [
+    path('articles/2003/', views.special_case_2003),
+    path('articles/<int:year>/', views.year_archive),
+    path('articles/<int:year>/<int:month>/', views.month_archive),
+    path('articles/<int:year>/<int:month>/<slug:slug>/', views.article_detail),
+]
+2.0版本中re_path和1.11版本的url是一样的用法
+```
+
+`settings.py`下的`ROOT_URLCONF = 'book_manager.urls'`为配置`url`路由
+
+`settings.py`下的`DEBUG = True`为调试模式,改成`False`网页报错就不会有大黄框了
 
 
 
 
 
+## 21.1 **正则表达式 :**
+
+
+
+| 字符        | 描述                                     |
+| ----------- | ---------------------------------------- |
+| .           | 匹配任意字符 ( 除了\n )                  |
+| \d          | 匹配数字                                 |
+| /D          | 匹配非数字                               |
+| [0-9]{4}    | 匹配0-9的四位数                          |
+| \s          | 匹配空白字符                             |
+| \S          | 匹配非空白字符                           |
+| \w          | 匹配单词字符 [a~z , A~Z,0~9]             |
+| \W          | 匹配非单词字符                           |
+| *           | 匹配前一个字符0次或者无限次              |
+| +           | 匹配前一个字符1次或者无限次              |
+| ?           | 匹配前一个字符0次或者一次                |
+| {m} , {m,n} | 匹配前面一个字符m次或者n次               |
+| ^           | 匹配字符串开头                           |
+| $           | 匹配字符串结尾                           |
+| \A \Z       | 指定的字符串匹配必须出现在在开头 /  结尾 |
+
+## 21.2 . 分组命名匹配
+
+### 21.2.1. 分组  - 位置参数
+
+**正则表达式分组匹配（通过圆括号）捕获URL中的值并以位置参数形式传递给视图函数**
+
+`urls.py :`
+
+```python
+url(r'^blog/([0-9]{4})/([0-9]{2})/$',views.blogs)
+```
+
+`views.py :`
+
+```python
+def blogs(request,year,month):
+    ...
+```
+
+
+
+### 21.2.2. 命名分组  - 关键字参数   
+
+- 在Python的正则表达式中，分组命名正则表达式组的语法是`(?P<name>pattern)`，其中`name`是组的名称，`pattern`是要匹配的模式
+- 获的值作为关键字参数而不是位置参数传递给视图函数。
+
+`urls.py :`
+
+```python
+url(r'^blog/(?p<year>[0-9]{4})/(?p<month>[0-9]{2})/$',views.blogs)
+```
+
+`views.py :`
+
+```python
+def blogs(request,year,month):  # 这里的参数必须是year,month
+    ...
+```
+
+### 21.2.3. 捕获的参数永远都是字符串
+
+每个在URLconf中捕获的参数都作为一个普通的Python字符串传递给视图，无论正则表达式使用的是什么匹配方式。例如，下面这行URLconf 中：
+
+```
+url(r'^articles/(?P<year>[0-9]{4})/$', views.year_archive),
+```
+
+传递到视图函数`views.year_archive()` 中的`year`参数永远是一个字符串类型
+
+### 21.2.4. 视图函数中指定默认值
+
+```python
+# urls.py中
+from django.conf.urls import url
+from . import views
+
+urlpatterns = [
+    url(r'^blog/$', views.page),
+    url(r'^blog/page(?P<num>[0-9]+)/$', views.page),
+]
+
+# views.py中，可以为num指定默认值
+def page(request, num="1"):
+    pass
+```
+
+​		在上面的例子中，两个URL模式指向相同的view - views.page - 但是第一个模式并没有从URL中捕获任何东西。
+
+​		如果第一个模式匹配上了，page()函数将使用其默认参数num=“1”,如果第二个模式匹配，page()将使用正则表达式捕获到的num值。
+
+## 21.3. include其他的URLconfs
+
+### 21.3.1. 路由分发
+
+**在一个项目中可能存在多个应用，为了方便区分和管理，在项目的总路由urls.py中会进行路由分发 :**
+
+**项目总路由`urls.py` :**
+
+```python
+from django.conf.urls import url,include
+	url(r'^app01/',include('app01.urls')),
+    url(r'^app02/',include('app02.urls')),
+    ... 
+```
+
+**子应用中创建自己的分路由`urls.py`，进行URLConf配置 :**
+
+```python
+from django.conf.urls import  url
+from app01 import views
+
+urlpatters=[
+	url(r'^blog/(?p<year>[0-9]{4})/(?p<month>[0-9]{2})/$',views.blogs),
+    ...
+]
+```
+
+
+
+### 21.3.2. 传递额外的参数给视图函数
+
+**`django.conf.urls.url()` 可以接收一个可选的第三个参数，它是一个字典，表示想要传递给视图函数的额外关键字参数。**
+
+```python
+urls.py:
+    
+from django.conf.urls import url
+from . import views
+
+urlpatterns = [
+    url(r'^blog/(?P<year>[0-9]{4})/$', views.func, {'foo': 'bar'}),
+]
+
+```
+
+```python
+viws.py
+
+def func(request,*args,**kwargs):
+    print(kwargs)  #  {'foo': 'bar'}
+```
+
+**注意 :**
+
+​		**当传递额外参数的字典中的参数和URL中捕获值的命名关键字参数同名时，函数调用时将使用的是字典中的参数，而不是URL中捕获的参数**
+
+## 21.4. 命名URL和URL反向解析
+
+### 21.4.1. 静态路由
+
+`urls.py :`
+
+**给URL匹配规则起个名字，一个URL匹配模式起一个名字 :**
+
+```python
+urlpatterns = [
+    url(r'^blog/', views.blog,name = 'blog'),
+]
+# 这样前后端配置好后,无论正则匹配blog怎样修改,前端页面代码地址都会相应改变,不会影响
+```
+
+**前端页面 :**
+
+```html
+<a href="{% url 'blog' %}">博客</a>
+```
+
+**后端`views.py`配置 :**
+
+```python
+from django.shortcuts import redirect,reversre 
+from django.urls import reverse # reverse也可以这样导入,上下二选一
+def blog(request):
+    return redirect(reverse('blog'))
+	# 由于redirect内部会尝试将 'blog' 当做url别名并自动反向解析
+    return redirect('blog')
+```
+
+
+
+### 21.4.2. 动态路由 ( 分组 ) 
+
+`urls.py :`
+
+```python
+urlpatterns = [
+    url(r'blog/([0-9]{4})/([0-9]{2})/$',views.blog,name='blog')
+```
+
+**前端页面 :**
+
+```html
+<a href="{% url 'blog' '2019' '09' %}">博客</a>
+```
+
+**后端`views.py`配置 :**
+
+```python
+from django.shortcuts import redirect,reversre 
+
+def blog(request):
+    return redirect('blog', '2019', '09')
+	# 另一写法
+	return redirect(reverse('blog', args=('2019', '09'))	
+    # 若args只有一个参数,注意参数后面加 逗号 ","
+```
+
+### 21.4.3. 命名分组动态路由
+
+**传参方式变了  - 关键字参数 (也可位置参数传参)**
+
+`urls.py :`
+
+```python
+url(r'^blog/(?p<year>[0-9]{4})/(?p<month>[0-9]{2})/$',views.blogs)
+```
+
+**前端页面 :**
+
+```html
+<a href="{% url 'blog' year='2019' month='9' %}">博客</a>
+```
+
+**后端`views.py`配置 :**
+
+```python
+def blog(request):
+    return redirect(reverse('blog',kwargs={'year':'2019','month':'9'}))
+```
+
+
+
+### 24.4.4. 名称空间区分不同app下的相同名字
+
+**不同的APP使用相同的URL名称，URL的命名空间模式也可以唯一反转命名的URL。**
+
+**namespace :**
+
+**主urls.py :**
+
+```python
+from django.conf.urls import include, url
+
+urlpatterns = [
+    url(r'^app01',include('app01.urls',namespace='app01')),
+    url(r'^app02',include('app02.urls',namespace='app02')),
+]
+```
+
+**前端页面 :**
+
+```html
+<a href = "{% url 'app01:blog' month = '9' year = '2019' %}">博客</a>
+```
+
+**views.py 下 :**
+
+```python
+def blog(request,*args,**kwargs):
+    return render(request,revers('app01:index'))
+```
+
+------
+
+# 22. ORM
+
+​		 **对象关系映射（Object Relational Mapping，简称ORM）模式是一种为了解决面向对象与关系数据库存在的互不匹配的现象的技术。**
+
+## 22.1. ORM常用字段
+
+**settings.py配置 :**
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'day57_book_manager',
+        'HOST': '127.0.0.1',
+        'PORT': 3306,
+        'USER': 'root',
+        'PASSWORD': '2108'
+    }
+}
+import pymysql
+pymysql.install_as_MySQLdb()	# 告诉Django使用pymysql模块连接MySQL数据库:
+```
+
+**models.py 下创建表结构 :**
+
+```python
+from django.db import models
+class Person(models.Model):
+    pid = models.AutoField(primary_key=True)    # 自增主键
+    name = models.CharField(max_length=32)  # varchar类型
+    age = models.IntegerField() 	# 整数类型
+    birth = models.DateTimeField(auto_now=True)  # 日期时间字段
+```
+
+**数据迁移 :**
+
+```python
+python manage.py makemigrations
+python manage.py migrate
+```
 
 
 
 
 
+------
+
+**pycharm中python Console窗口下创建数据 :**
+
+```python
+>>>from app01 import models
+>>>models.Person.object.create(name='Tony',age=46)
+```
 
 
 
+## 22.2 常用字段 
+
+[Django官网查询所有字段](https://docs.djangoproject.com/en/1.11/ref/models/fields/#field-types"Django官网")
+
+| 字段          | 描述                                                         |
+| ------------- | ------------------------------------------------------------ |
+| AutoField     | 自增的整形字段，必填参数primary_key=True，则成为数据库的主键。无该字段时，django自动创建。一个model不能有两个AutoField字段。 |
+| IntegerField  | 一个整数类型。数值的范围是 -2147483648 ~ 2147483647。        |
+| CharField     | 字符类型，必须提供max_length参数。max_length表示字符的长度。 |
+| TextField     | 存长字符串                                                   |
+| DateField     | 日期类型，日期格式为YYYY-MM-DD，相当于Python中的datetime.date的实例<br />参数：<br />auto_now：每次修改时修改为当前日期时间。<br /> auto_now_add：新创建对象时自动添加当前日期时间。<br />auto_now和auto_now_add和default参数是互斥的，不能同时设置。 |
+| DatetimeField | 日期时间字段，格式为YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]，相当于Python中的datetime.datetime的实例。 |
+| BooleanField  | 布尔值                                                       |
+| DecimalField  | 十进制小数<br />相关参数 ：<br />max_ digits=5 小数总长度<br />decimal_ p laces=2 小数位长度 |
+
+## 22.3. 字段的参数 
+
+DateField 日期
+
+```python
+null=True 数据库中该字段可以为空
+blank=True Django中form表单可以为空
+一般 null=True 和 blank=True 一起使用
+
+db_column = 'username' 指定字段按在数据库中的名字()
+default   默认值
+unique  唯一索引
+verbose_name   admin后台管理中显示的字段名称
+
+choices=((True, '男'), (False, '女'))    可选择的参数
+gender = models.BooleanField(default=True,choices = ((True,'男),(False,'女'))
+```
 
 
 
+## 22.4. 自定义字段
+
+```python
+class MyCharField(models.Field):
+    """
+    自定义的char类型的字段类
+    """
+    def __init__(self, max_length, *args, **kwargs):
+        self.max_length = max_length
+        super(MyCharField, self).__init__(max_length=max_length, *args, **kwargs)
+ 
+    def db_type(self, connection):
+        """
+        限定生成数据库表的字段类型为char，长度为max_length指定的值
+        """
+        return 'char(%s)' % self.max_length
+```
 
 
 
+## 22.5. Model Meta参数
+
+在类内定义类 [官网](https://docs.djangoproject.com/en/1.11/ref/models/options/#model-meta-options)
+
+```python
+class UserInfo(models.Model):
+    nid = models.AutoField(primary_key=True)
+    username = models.CharField(max_length=32)
+ 
+    class Meta:
+        # 数据库中生成的表名称 默认 app名称 + 下划线 + 类名
+        db_table = "table_name"
+ 
+        # admin中显示的表名称
+        verbose_name = '个人信息'
+ 
+        # verbose_name加s
+        verbose_name_plural = '所有用户信息'
+ 
+        # 联合索引 
+        index_together = [
+            ("pub_date", "deadline"),   # 应为两个存在的字段
+        ]
+ 
+        # 联合唯一索引
+        unique_together = (("driver", "restaurant"),)   # 应为两个存在的字段
+```
 
 
 
+## 22.6. admin后台管理
+
+1. 创建超级用户
+
+   ```python
+   python manage.py createsuperuser
+   ```
+
+2. admin后台管理改成中文
+
+   ```python
+   settings.py中
+   LANGUAGE_CODE = 'en-us'  修改为 "zh_hans"	
+   ```
+
+3. 注册自己的数据库
+
+   ```python
+   app01.py下的admin.py文件中 :
+   from app01 import models	# 导入models
+   admin.site.register(models.Person)	# 注册自己的数据库
+   ```
+
+   
+
+## 22.7. ORM操作
+
+单文件执行操作数据库
+
+```python
+1. manage.py下复制这条语句
+ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "book_manager.settings")
+2. 根目录下新建py文件 :
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "book_manager.settings")
+import Django
+Django.setup()
+from app01 import models
+ret = models.Person.object.all()
+print(ret)
+```
+
+### 基本用法 :
+
+#### 1. 返回queryset对象列表
+
+| 函数          | 描述                                                         |
+| ------------- | ------------------------------------------------------------ |
+| all()         | 获取所有数据  返回的是对象列表                               |
+|               | ret = models.Person.objects.all()                            |
+| filter()      | 获取所有满足条件的数据  返回的是对象列表                     |
+|               | ret = models.Person.objects.filter(pk=100                    |
+| exclude()     | 排除满足条件的数据   返回的是对象列表                        |
+|               | ret = models.Person.objects.exclude(pk=100)                  |
+| values()      | 把所有对象以列表的形式返回,列表的每一个元素是个个对象的数据字典形式 |
+|               | ret= models.Person.objects.all().values('pid','name')        |
+| values_list() | 返回的是元组不是字典                                         |
+|               | ret= models.Person.objects.all().values_list('name','pid',)  |
+| order_by()    | 排序  默认升序   若要降序,在字段前加 "-"	order_by("-pid") |
+|               | ret = models.Person.objects.all().order_by('age','-pid')     |
+| reverse()     | 对已经排序的数据进行反转                                     |
+|               | ret = models.Person.objects.all().order_by('age','-pid').reverse() |
+| distinct()    | 去重                                                         |
+|               | ret = models.Person.objects.values('age').distinct()         |
+
+#### 2. 返回一个对象/布尔值/数字
+
+| 函数       | 描述                                                         |
+| ---------- | ------------------------------------------------------------ |
+| get()      | 获取一个满足条件的数据	返回的是一个对象 存在且唯一,查不到会报错 |
+|            | ret = models.Person.objects.get(pk=1)                        |
+| first()    | 返回第一个对象	拿不到返回None                             |
+|            | ret = models.Person.objects.all().first()                    |
+| last()     | 返回最后一个对象	拿不到返回None                           |
+|            | ret = models.Person.objects.all().last()                     |
+| 返回布尔值 |                                                              |
+| exists()   | 存在就是Ture  不存在就是False                                |
+|            | ret = models.Person.objects.filter(pk=100).exists()          |
+| 返回数字   |                                                              |
+| count()    | 计数                                                         |
+|            | ret = models.Person.objects.all().count()                    |
 
 
 
+## 22.8. 单表查询之神奇的双下划线
 
-
-
-
-
-
+| 函数        | s说明                                                        |
+| ----------- | ------------------------------------------------------------ |
+| gt          | 获取pk大于1的数据	greater than                            |
+|             | ret = models.Person.objects.filter(pk__gt=1)                 |
+| lt          | 获取pk小于5的数据	less than                               |
+|             | ret = models.Person.objects.filter(pk__lt=5)                 |
+| gte         | 获取pk大于等于1的数据	greater than equal                  |
+|             | ret = models.Person.objects.filter(pk__gte=1)                |
+| lte         | 获取pk小于等于5的数据  less than  equal                      |
+|             | ret = models.Person.objects.filter(pk__lte=5)                |
+| range       | 获取pk1-5且包含1,包含5的数据                                 |
+|             | ret = models.Person.objects.filter(pk__range=[1,5])          |
+| in          | 获取pk中含有列表里的数据                                     |
+|             | ret = models.Person.objects.filter(pk__in=[1,5,7,9])         |
+| contains    | 获取name中包含alex字符串的数据                               |
+|             | ret = models.Person.objects.filter(name__contains='alex')    # like |
+| icontains   | 获取name中包含alex字符串的数据 忽略大小写                    |
+|             | ret = models.Person.objects.filter(name__icontains='aLex')     # like ignore |
+| startswith  | 以什么开头                                                   |
+|             | ret = models.Person.objects.filter(name__startswith='a')    # 以什么开头 |
+| istartswith | 以什么开头 ignore 忽略大小写                                 |
+|             | ret = models.Person.objects.filter(name__istartswith='a')  # 以什么开头 gnore 忽略大小写 |
+| endswith    | 以什么结尾                                                   |
+|             | ret = models.Person.objects.filter(name__endswith='x')  # 以什么结尾 |
+| iendswith   | 以什么结尾 ignore 忽略大小写                                 |
+|             | ret = models.Person.objects. filter(name__iendswith='a')  # 以什么结尾 gnore 忽略大小写 |
+| year        | 查年份   birth是字段名                                       |
+|             | ret = models.Person.objects.filter(birth__year='2020')       |
+|             | ret = models.Person.objects.filter(birth__contains='2020-10') |
+| isnull      | 查为空的数据                                                 |
+|             | ret = models.Person.objects.filter(age__isnull=False)        |
 

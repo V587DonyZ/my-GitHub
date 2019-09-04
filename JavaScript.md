@@ -1,4 +1,4 @@
-# JavaScript基础
+#   JavaScript基础
 
 ## 1. 什么是JavaScript
 
@@ -219,6 +219,13 @@ var s2 = "双引号"
 	
 	var s3 = 'a,b,c,d,e,f,g'
 	s3.split(',',3) // (3) ["a", "b", "c"]  只取前三个
+9. charAt 获取相应索引对应的字符
+<script>
+    var str1 = '你好 哈偶'
+    console.log(str1.charAt(1)) //好
+    console.log(str1.charAt(3)) //哈
+</script>
+10. charCodeAt 获取相应索引对应的编码(Unicode)
 ```
 
 ## 9. 数据类型转换
@@ -1073,6 +1080,9 @@ while ( 条件表达式 ) {
 	第一个参数value，就是当前正在遍历的元素
 	第二个参数index，就是当前正在遍历的元素的索引
 	第三个参数obj，就是正在遍历的数组
+17. toString 数组转成字符串
+	var arr = [1,2,3,'哈哈']
+    arr2 = arr.toString()
 ```
 
 - **遍历数组**
@@ -1363,6 +1373,29 @@ p1.sayHi();
 //sayHi()中的this，是p1，此时是p1调用sayHi()
 ```
 
+## 19. Date 日期
+
+**常用方法 :**
+
+```js
+<script>
+    var date = new Date()  // 声明日期对象
+    console.log(date)  // Sun Sep 01 2019 21:58:28 GMT+0800
+    console.log(date.getMonth())  // 月 ,从0开始
+    console.log(date.getDate())  // 日 ,从1开始    特殊***
+    console.log(date.getDay())  // 星期 ,从0开始 (星期日-星期一  对应 0-6)
+    console.log(date.getFullYear())  // 完整的年份
+    console.log(date.getHours())   // 小时
+    console.log(date.getMinutes())  //分钟
+    console.log(date.getSeconds())  // 秒
+    console.log(date.getTime())  // 时间戳
+</script>
+```
+
+
+
+
+
 
 
 ------
@@ -1371,4 +1404,651 @@ p1.sayHi();
 
 # JS特效 -BOM 和 DOM
 
-## 1. 
+## 1. DOM
+
+### 1.1.windows和document
+
+**windows :**
+
+```python
+所有的浏览器都支持window对象，它支持浏览器窗口
+所有的js全局对象，函数以及变量都能自动成为window对象的成员
+全局变量是window对象的属性，全局函数是window对象的方法
+```
+
+**document :**
+
+```python
+document也是window对象的属性之一
+document对象是documentHTML的一个实例，也是window对象的一个属性，因此可以将document对象作为一个全局对象来访问
+```
+
+**document 常用属性 :**
+
+```js
+    console.log(document);
+    console.log(document.childNodes);
+    console.log(document.head);
+    console.log(document.body);
+    document.title = "测试";
+    console.log(document.title);
+```
+
+### 1.2.事件
+
+```
+用户和浏览器之间的交互行为,	比如：点击按钮，鼠标进入/离开、双击...
+我们可以在事件对应的属性中实现一些js代码，这样当事件被触发时，这些代码将会执行
+```
+
+**事件的  点击按钮  实例 :**
+
+```js
+方式一 : 结构和行为耦合，不方便维护，不推荐使用	
+<button id="btn" onmousemove="alert('点我了');">按钮1</button>
+
+方式二 : 为按钮的对应事件绑定处理函数的形式来响应事件
+页面部分 :
+<button id='btn'>按钮</button>
+script部分:
+var btn = document.getElementById('btn');
+btn.onclick = function (ev) {
+        alert('你再点一下试试?');
+ }
+```
+
+### 1.3.文档加载顺序
+
+- **存在问题 :**
+
+  ```
+  	浏览器在加载一个页面时，是按照自上向下的顺序加载的,读取到一行就运行一行, 如果将script标签写到head内部，在代码执行时，页面还没有加载，页面中的DOM对象也没有加载.会导致在js中无法获取到页面中的DOM对象
+  ```
+
+- **解决方法 :**
+
+  - **方法一 :**
+
+    ```js
+    1. 首先了解 onload事件会在整个页面加载完成之后才触发
+    2. 为window绑定一个onload事件, 该事件对应的响应函数将会在页面加载完成之后执
+    3. 在onload事件里面写script
+    代码格式 :
+    <script>
+      windows.onload = function(){
+            js代码
+        }
+    </script>
+    ```
+  
+  - - **把script标签放在body尾部**
+
+### 1.4. 获取DOM对象
+
+```js
+1. 通过ID获取 : 
+	var btn1 = document.getElementById("btn");
+2. 通过类获取(获取的是列表):
+	var btn2 = document.getElementsByClassName("my-btn")[0];
+3. 通过标签名称获取(获取的是列表):
+	var btn3 = document.getElementsByTagName("button")[0];
+4. 通过name获取 :
+	var btn4 = document.getElementsByName("btn")[0];
+5. 通过选择器获取 :匹配到第一个就不再查找
+	var btn5 = document.querySelector(".my-btn");
+6. 通过选择器获取所有 :
+	var btn6 = document.querySelectorAll(".my-btn")[0];
+```
+
+### 1.5.节点之间的获取
+
+#### 1.5.1. 获取父节点 - parentNode
+
+```js
+通过子盒子设置父盒子的背景色
+var btn = document.getElementsByClassName("btn")[0];
+btn.onclick = function () {
+	var span = document.getElementById("span");
+	var box = span.parentNode;
+	box.style.backgroundColor = "red";
+};
+```
+
+#### 1.5.2. 上一个兄弟节点
+
+```js
+ var previous = span.previousElementSibling || span.previousSibling;
+||后面是为了支持iE10
+```
+
+#### 1.5.3. 下一个兄弟节点
+
+```js
+ var next = span.nextElementSibling || span.nextSibling;
+```
+
+#### 1.5.4. 获取标签中第一个子节点
+
+```js
+box.firstElementChild || box.firstChild
+```
+
+#### 1.5.5. 获取标签中最后一个子节点
+
+```js
+box.lastElementChild || box.lastChild
+```
+
+#### 1.5.6. 获取所有元素节点 - nodeType
+
+```js
+ window.onload = function () {
+        // 1. 获取标签
+        var box = document.getElementById("box");
+        // 2. 获取所有子节点
+        var allNodeList = box.childNodes;
+        console.log(allNodeList);
+
+        var newList = [];
+        for(var i=0; i<allNodeList.length; i++){
+            var node = allNodeList[i];
+            if(node.nodeType === 1){
+               newList.push(node)
+            }
+        }
+
+        console.log(newList);
+    }
+```
+
+#### 1.5.7.  获取任意兄弟节点
+
+```js
+var mt = document.getElementsByClassName("mt")[0];
+console.log(mt.parentNode.children[1]);
+```
+
+### 1.6. 节点操作
+
+#### 1.6.1. CRUD(增删改查)
+
+##### 创建节点
+
+```js
+document.createElement("img");
+box.appendChild(img);
+
+box.insertBefore(img, btn);
+```
+
+##### 删除节点
+
+```js
+var btn = document.getElementById("btn");
+word.parentNode.removeChild(word); // 自杀
+ // btn.remove();
+```
+
+##### 克隆节点
+
+```js
+var box = document.getElementsByClassName("box")[0];
+var newTag = box.cloneNode(true);
+// console.log(newTag);
+
+document.body.appendChild(newTag);
+```
+
+#### 1.6.2. 节点属性（节点.属性）
+
+```js
+节点属性（节点.属性）
+	获取：getAttribute(名称)
+	设置：setAttribute(名称, 值)
+	删除：removeAttribute(名称)
+```
+
+### 1.7 value/innerHTML/innerText
+
+- value 一般是input中的属性, 显示的是输入框的内容
+- innerHTML - 双闭合标签的所有内容 ( 包括标签下的标签 )
+- innerText - 双闭合标签的内容 (不包括标签 )
+
+### 1.8. transform
+
+```html
+    <style>
+        #box {
+            width: 90px;
+            height: 90px;
+            background-color: orangered;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<button id="btn">变形</button>
+<div id="box"></div>
+<script>
+    window.onload = function () {
+        // 定义获取id的函数
+        function $(id) {
+            return typeof id === 'string' ? document.getElementById(id) : null;
+        };
+
+        var index = 0;
+        $('btn').onclick = function () {
+            index++;
+            $('box').style.transform = 'translate(' + (index * 50) + 'px, ' + (index * 50) + 'px) rotate(' + (index * 50) + 'deg) scale(' + (index * 1.2) + ')';
+        }
+    };
+</script>
+
+```
+
+### 1.9. 输入框焦点处理 - input
+
+```html
+<body>
+<!--placeholder 为文本框提示内容-->
+<input id="name" type="text" placeholder="请输入用户名">
+<script>
+    window.onload = function () {
+    //    1. 获得需要的焦点
+        var name = document.getElementById('name');
+    //    2. 获得焦点
+        name.onfocus = function () {
+            this.style.color = 'green'
+        };
+    //     3.失去焦点
+        name.onblur = function () {
+            this.style.color = 'red'
+        }
+    }
+</script>
+</body>
+```
+
+### 1.10 parselnt - 取整
+
+**`Math :`**
+
+- **向上取整**
+
+- ```js
+  <script>
+      var num = 10.568;
+      console.log(Math.ceil(num))
+  </script>
+  // 结果 : 11
+  ```
+
+- **向下取整 :**
+
+- ```js
+  <script>
+      var num = 10.568;
+      console.log(Math.ceil(num))
+      console.log(Math.floor(num))
+  </script>
+  // 结果 : 10
+  ```
+
+- **四舍五入 :**
+
+- ```js
+  <script>
+      var num = 10.568;
+      console.log(Math.ceil(num))
+      console.log(Math.floor(num))
+      console.log(Math.round(num))
+  </script>
+  // 结果 : 11
+  ```
+
+**parseInt :**
+
+`parseInt` **向下取整**
+
+```js
+<script>
+    var num = 10.568;
+    console.log(parseInt(num))
+</script>
+// 结果 : 10
+```
+
+`parseInt` **可以是数字开头的字符串**
+
+```js
+<script>
+    var num = '10.568hah哈';
+    console.log(parseInt(num))
+</script>
+// 结果 : 10
+```
+
+`parseFloat` **提取小数**
+
+```js
+<script>
+    var num = '10.568hah哈';
+    console.log(parseFloat(num))
+</script>
+// 结果 : 10.568
+```
+
+### 1.11. 表单验证
+
+## 小案例
+
+### 1. 日历
+
+```html
+   <style>
+        #box {
+            width: 250px;
+            height: 300px;
+            background-color: orangered;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        #box_top {
+            font-size: 23px;
+            color: #fff;
+            margin-bottom: 40px;
+
+        }
+
+        #box_bottom {
+            width: 90%;
+            height: 70%;
+            background-color: orange;
+            margin: 0 auto;
+            font-size: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+<div id="box">
+    <div id="box_top"></div>
+    <div id="box_bottom"></div>
+</div>
+<script>
+    window.onload = function () {
+    //    1. 创建日期对象
+        var date = new Date();
+        var y = date.getFullYear();
+        var m = date.getMonth();
+        var d = date.getDate();
+        var week = date.getDay();
+        var weeks = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+    //    2 赋值
+        $('box_top').innerText = y + '年' + m + '月' + d + '日' + weeks[week];
+        $('box_bottom').innerText = d
+        function $(id) {
+            return typeof id === 'string'? document.getElementById(id) : null;
+        }
+    }
+</script>
+</body>
+```
+
+### 2. 定时器
+
+`setInterval`
+
+#### **基本语法 :** 
+
+- `window.setInterval(执行的代码,时间间隔毫秒)`
+- `setInterval("console.log('每一秒打印一次')",1000)`
+
+#### **常见格式 :**
+
+- `setInterval("func()",1000);`  
+- `setInterval(func,1000);`  → 调用func函数
+- `setInterval(function () { })`
+
+#### **开启和结束定时器 :**
+
+```js
+<body>
+<button id="btn1">开启定时器</button>
+<button id="btn2">结束定时器</button>
+<script>
+    window.onload = function () {
+        //    1. 获取需要的标签
+        var btn1 = document.getElementById("btn1");
+        var btn2 = document.getElementById("btn2");
+        var height = 150;
+        var timer = null; // 留做清除定时器用
+        //    2. 开启定时器
+        btn1.onclick = function () {
+            timer = setInterval(function () {
+                height++;
+                console.log('身高是:'+height + 'cm')
+            },1000)
+        };
+        //    3. 结束定时器
+        btn2.onclick = function () {
+            clearInterval(timer);
+        }
+    }
+</script>
+```
+
+#### 倒计时
+
+```js
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        body {
+            background-color: #000;
+            text-align: center;
+            padding: 110px;
+        }
+
+        #pic {
+            display: none;
+        }
+
+        #time {
+            font-size: 100px;
+            color: mediumvioletred;
+        }
+    </style>
+</head>
+<body>
+<div id="time">5</div>
+<img id="pic" src="imh.jpg" alt="">
+<script>
+        window.onload = function () {
+           var timer = setInterval(function () {
+               $("time").innerText -=1;
+               // 判断定时器是不是走到0
+               if ($("time").innerText === "0") {
+               //    清除定时器
+                   clearInterval(timer);
+                   //隐藏时间
+                   $('time').style.display = 'none';
+                   $('pic').style.display = 'block';
+               }
+           },1000);
+
+
+           function $(id) {
+               return typeof id === "string"? document.getElementById(id):null;
+           }
+        }
+</script>
+```
+
+### 3. 自定义倒计时时间
+
+```js
+    <style>
+        #time {
+            font-size: 40px;
+            color: red;
+            text-align: center;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+<div id="time"></div>
+<script>
+    window.onload = function () {
+        // 1. 获取标签
+        var time = document.getElementById('time');
+        // 2.自定义将来时间
+        var fut_Date = new Date('2020/01/01 00:00:00');
+        // 3.开启定时器
+        setInterval(function () {
+            // 4. 获取现在的时间
+            var now_Date = new Date();
+            // 5. 获取时间戳
+            var now_time = now_Date.getTime();
+            var fut_time = fut_Date.getTime();
+            // 6. 计算时间戳
+            var all_time = fut_time - now_time;
+            // 7. 时间转换 (毫秒转秒)
+            var allSecond = parseInt(all_time / 1000);
+            // 8. 转化正常时间
+            var day = dou(parseInt(allSecond / 3600 / 24));
+            var hour = dou(parseInt(allSecond / 3600 % 24));
+            var min = dou(parseInt(allSecond / 60 % 60));
+            var second = dou(parseInt(allSecond % 60));
+            //    9. 注入时间
+            time.innerText = "距离2020年元旦还有" + day + "天" + hour + "小时" + min + "分钟" + second + "秒";
+
+        }, 1000);
+
+        // 10. 解决显示两位数
+        function dou(num) {
+            return num > 10 ? num : "0" + num;
+        }
+    }
+</script>
+```
+
+### 4. 防止定时器累加
+
+**先清除定时器,再设置定时器**
+
+```js
+<script>
+  window.onload = function(){
+    var timer = null;
+    xx.onmouseover = function(){
+        //清除定时器
+        clearInterval(timer);
+        timer = setInterval(function(){
+            console.log('xxx');
+        },1000)
+    }
+}  
+</script>
+```
+
+### 5.抽奖
+
+```html
+    <style>
+        body {
+            text-align: center;
+        }
+
+        #name {
+            font-size: 20px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+<button id="begin">开始</button>
+<button id="end">停</button>
+<div id="name">请开始</div>
+<script>
+    window.onload = function () {
+        // 1. 获取标签
+        var begin = document.getElementById('begin');
+        var end = document.getElementById('end');
+        var name = document.getElementById('name');
+        var timer = null;
+        // 2. 定义变量
+        var name_arry = ['周传雄', '周杰伦', '林俊杰', '薛之谦', '邓紫棋', '周笔畅', '大壮', '周华健', '刘若英', '曲婉婷', '许嵩', '萧亚轩']
+        // 3. 监听点击
+        begin.onclick = function () {
+            // 3.1 清除定时器
+            clearInterval(timer);
+            // 3.2 设置定时器
+            timer = setInterval(function () {
+                //3.3 随机数
+                var n_index = parseInt(Math.random() * name_arry.length);
+                name.innerText = name_arry[n_index];
+            }, 20);
+        };
+        end.onclick = function () {
+            clearInterval(timer)
+        }
+    }
+</script>
+```
+
+
+
+### 6.一次定时器  timeout
+
+```html
+    <style>
+        body {
+            text-align: center;
+        }
+
+        #name {
+            font-size: 20px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+<button id="begin">开始</button>
+<button id="end">停</button>
+<div id="name">请开始</div>
+<script>
+    window.onload = function () {
+        // 1. 获取标签
+        var begin = document.getElementById('begin');
+        var end = document.getElementById('end');
+        var name = document.getElementById('name');
+        var timer = null;
+        // 2. 定义变量
+        var name_arry = ['周传雄', '周杰伦', '林俊杰', '薛之谦', '邓紫棋', '周笔畅', '大壮', '周华健', '刘若英', '曲婉婷', '许嵩', '萧亚轩']
+        // 3. 监听点击
+        begin.onclick = function () {
+            // 3.1 清除定时器
+            clearInterval(timer);
+            // 3.2 设置定时器
+            timer = setInterval(function () {
+                //3.3 随机数
+                var n_index = parseInt(Math.random() * name_arry.length);
+                name.innerText = name_arry[n_index];
+            }, 20);
+        };
+        end.onclick = function () {
+            clearInterval(timer)
+        }
+    }
+</script>
+```
+
