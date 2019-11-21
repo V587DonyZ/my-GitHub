@@ -1,7 +1,3 @@
-python-interview
-
-[最新版本链接地址](https://github.com/wangyitao/python-interview)
-
 ##### 为什么学python
 
 [为什么学python](https://blog.csdn.net/Darkman_EX/article/details/81101232)
